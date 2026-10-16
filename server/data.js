@@ -12,6 +12,7 @@ export const schemas = {
     "Variable Data",
     "Inactive",
     "Outsourced?",
+    "Express Image Item",
     "Type",
   ],
   connectors: [
@@ -358,15 +359,23 @@ export function buildTree(data, id, quantity, selections = {}) {
           ? "Choose a BOM revision."
           : "No BOM revision available.",
       );
+    const routingIssue = (message) => {
+      node.complete = false;
+      if (item["Express Image Item"] === "No")
+        warnings.push(
+          `${message} Routing is optional because Express Image Item is No; hours estimate is incomplete.`,
+        );
+      else errors.push(message);
+    };
     if ((data.names.get(bomName)?.size || 0) > 1)
-      fail("BOM name is ambiguous; routing cannot be matched safely.");
+      routingIssue("BOM name is ambiguous; routing cannot be matched safely.");
     else {
       const routingRows = (data.routings.get(bomName) || []).filter(
         (r) => r["Default Routing?"] === "Yes",
       );
       const names = [...new Set(routingRows.map((r) => r["Routing Name"]))];
       if (names.length !== 1 || !names[0])
-        fail(
+        routingIssue(
           names.length > 1
             ? "Multiple default routings."
             : "No default routing.",
@@ -388,14 +397,16 @@ export function buildTree(data, id, quantity, selections = {}) {
               Number(a["Operation Sequence"]) - Number(b["Operation Sequence"]),
           );
         if (node.operations.some((o) => o.hours === null))
-          fail("Routing contains blank or invalid setup/run-rate values.");
+          routingIssue(
+            "Routing contains blank or invalid setup/run-rate values.",
+          );
         node.hours = node.operations.reduce(
           (sum, o) => sum + (o.hours ?? 0),
           0,
         );
         if (!Number.isFinite(node.hours)) {
           node.hours = 0;
-          fail("Routing estimate exceeds the supported numeric range.");
+          routingIssue("Routing estimate exceeds the supported numeric range.");
         }
       }
     }

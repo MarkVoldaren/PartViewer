@@ -46,7 +46,7 @@ const hours = (n: number) =>
     maximumFractionDigits: 3,
   });
 async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch("/api" + url, options);
+  const res = await fetch(import.meta.env.BASE_URL + "api" + url, options);
   const body = await res.json();
   if (!res.ok) throw Error(body.error || "Request failed");
   return body;
@@ -56,6 +56,71 @@ const post = (body: unknown) => ({
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify(body),
 });
+
+function AssemblySummary({ root }: { root: PartNode }) {
+  const counts = { ready: 0, blocked: 0, outsourced: 0 };
+  const count = (node: PartNode) => {
+    if (node.status in counts) counts[node.status as keyof typeof counts]++;
+    node.children.forEach(count);
+  };
+  count(root);
+  const branch = (node: PartNode): React.ReactNode => (
+    <li key={node.key}>
+      <div className={`summary-node ${node.status}`}>
+        <div className="summary-node-heading">
+          <strong>{node.item["Item Name"]}</strong>
+          <span className={`badge ${node.status}`}>
+            {node.status === "ready"
+              ? "Ready"
+              : node.status === "outsourced"
+                ? "Outsourced"
+                : node.status === "material"
+                  ? "Material"
+                  : "Needs attention"}
+          </span>
+        </div>
+        <small>
+          #{node.itemId} · Qty {fmt(node.quantity)} {node.units || ""}
+        </small>
+        {node.errors.length > 0 && (
+          <p className="summary-reason">{node.errors.join(" · ")}</p>
+        )}
+        {node.warnings.length > 0 && node.status !== "outsourced" && (
+          <p className="summary-note">{node.warnings.join(" · ")}</p>
+        )}
+      </div>
+      {node.children.length > 0 && <ul>{node.children.map(branch)}</ul>}
+    </li>
+  );
+  return (
+    <section
+      className="assembly-summary"
+      aria-label="Assembly readiness summary"
+    >
+      <div className="summary-heading">
+        <div>
+          <p className="eyebrow">At a glance</p>
+          <h2>Assembly readiness</h2>
+        </div>
+        <p>
+          {counts.ready} ready · {counts.blocked} need attention ·{" "}
+          {counts.outsourced} outsourced
+        </p>
+      </div>
+      <div
+        className="summary-scroll"
+        tabIndex={0}
+        aria-label="Assembly flow chart"
+      >
+        <ul className="summary-tree">{branch(root)}</ul>
+      </div>
+      <p className="summary-caption">
+        Each assembly is checked independently. Detailed routing steps appear
+        below.
+      </p>
+    </section>
+  );
+}
 
 function WorkOrder({
   node,
@@ -326,6 +391,7 @@ function App() {
     setSelections({});
     setView(null);
     setSelected(null);
+    setQuery("");
     request.current++;
   };
   useEffect(() => {
@@ -338,7 +404,7 @@ function App() {
   }, []);
   useEffect(() => {
     const ticket = ++searchRequest.current;
-    if (!authenticated || query.trim().length < 1) {
+    if (!authenticated || selected || query.trim().length < 1) {
       setHits([]);
       return;
     }
@@ -355,7 +421,7 @@ function App() {
         });
     }, 200);
     return () => clearTimeout(timer);
-  }, [query, authenticated, metadata?.id]);
+  }, [query, selected, authenticated, metadata?.id]);
   const evaluate = async (part: Hit, choices: Record<string, string>) => {
     const ticket = ++request.current;
     setBusy(true);
@@ -381,12 +447,14 @@ function App() {
     }
   };
   const choose = (part: Hit) => {
+    request.current++;
+    setBusy(false);
+    setError("");
     setSelected(part);
     setSelections({});
     setHits([]);
-    setQuery("");
+    setQuery(part.name);
     setView(null);
-    evaluate(part, {});
   };
   if (authenticated === null)
     return (
@@ -528,11 +596,22 @@ function App() {
                   id="part-search"
                   placeholder="Search part name or internal ID…"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    request.current++;
+                    searchRequest.current++;
+                    setBusy(false);
+                    setSelected(null);
+                    setSelections({});
+                    setView(null);
+                    setHits([]);
+                    setSearchError("");
+                    setError("");
+                    setQuery(e.target.value);
+                  }}
                   autoComplete="off"
                   disabled={!metadata}
                 />
-                {query && (
+                {query && !selected && (
                   <div className="search-results">
                     {searchError ? (
                       <p>{searchError}</p>
@@ -588,6 +667,7 @@ function App() {
             )}
             {view ? (
               <>
+                <AssemblySummary root={view.root} />
                 <section className="metrics">
                   <div>
                     <span>Selected part</span>

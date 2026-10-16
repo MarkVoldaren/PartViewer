@@ -18,7 +18,9 @@ Open http://localhost:3000 and sign in with the configured password. Import the 
 
 For development, run `npm run server` with the password environment variable in one terminal and `npm run dev` in another. Open Vite's localhost URL; its API proxy uses port 3000.
 
-## Docker package (deployment is intentionally deferred)
+## Docker package
+
+For the shared DuraMark droplet, use [DEPLOYMENT.md](DEPLOYMENT.md) and `compose.production.yaml`. The configuration below is for local Docker testing.
 
 Copy `.env.example` to `.env` and replace the password. Run `docker compose up --build -d` when ready. The app binds to localhost port 3000; SQLite resides in the named `part-viewer-data` volume. CSV exports and local data are excluded from the image and Git. A fresh container starts without business data; import through the app after sign-in.
 
@@ -50,7 +52,7 @@ Routing matches use exact BOM names because the routing export lacks BOM IDs. A 
 - Inactive items are blocked. Exact `Outsourced` classification stops expansion, with no work order or routing hours. Other classifications do not bypass checks.
 - Only `Type = Assembly` generates a proposed work order. Other types, including kits, are materials.
 - DuraMark and customer approvals must explicitly equal `Yes`. Variable data displays the sales-order PRO warning.
-- Exactly one master default BOM and one default routing are required. Duplicate identical item/BOM links count as one link.
+- Exactly one master default BOM is required. Routing is optional for readiness only when `Express Image Item = No`; otherwise exactly one valid default routing is required. Optional routing issues appear as warnings and leave hour estimates incomplete. Duplicate identical item/BOM links count as one link.
 - A single revision is automatic; multiple revisions require a selection. Selections apply consistently by BOM within the current lookup and reset after an import or part change. No date-based revision selection is attempted.
 - Setup and run-rate fields must be finite nonnegative numbers; blanks are unresolved. Step hours = `(setup minutes + run rate × quantity) / 60`. Fractional quantities remain unrounded internally. Display rounding does not change calculations.
 - Child quantities multiply the parent quantity by exported component quantities directly, with no unit conversions. Each occurrence is a separate proposed work order with its own setup charge.

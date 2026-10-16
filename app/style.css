@@ -853,3 +853,125 @@ footer {
     padding: 28px;
   }
 }
+
+.assembly-summary {
+  background: #fff;
+  border: 1px solid #dce4dc;
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin-bottom: 28px;
+}
+.summary-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.summary-heading h2 {
+  margin: 0;
+}
+.summary-heading > p,
+.summary-caption {
+  font-size: 11px;
+  color: #748374;
+  margin: 0;
+}
+.summary-scroll {
+  max-height: 360px;
+  overflow: auto;
+  padding: 2px 6px 4px 0;
+}
+.summary-tree,
+.summary-tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.summary-tree ul {
+  margin-left: 18px;
+  padding-left: 22px;
+  border-left: 1px solid #c4d3c0;
+}
+.summary-tree li {
+  position: relative;
+  padding: 0 0 10px;
+}
+.summary-tree ul > li::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 1px;
+  background: #c4d3c0;
+  top: 25px;
+  left: -22px;
+}
+.summary-node {
+  border: 1px solid #e2e8df;
+  border-left: 3px solid #bd924f;
+  border-radius: 7px;
+  padding: 10px 13px;
+  background: #fcfdf9;
+  margin-bottom: 10px;
+}
+.summary-node.ready {
+  border-left-color: #4c8a66;
+}
+.summary-node.outsourced,
+.summary-node.material {
+  border-left-color: #8a9fa3;
+}
+.summary-node-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.summary-node-heading strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.summary-node small {
+  display: block;
+  font-size: 10px;
+  color: #7a8878;
+  margin-top: 3px;
+}
+.summary-reason,
+.summary-note {
+  font-size: 11px;
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+.summary-reason {
+  color: #9c4934;
+}
+.summary-note {
+  color: #8d6c2f;
+}
+.summary-caption {
+  margin-top: 12px;
+}
+@media (max-width: 520px) {
+  .assembly-summary {
+    padding: 16px 12px;
+  }
+  .summary-heading {
+    display: block;
+  }
+  .summary-heading > p {
+    margin-top: 10px;
+  }
+  .summary-tree ul {
+    margin-left: 8px;
+    padding-left: 12px;
+  }
+  .summary-tree ul > li::before {
+    left: -12px;
+    width: 12px;
+  }
+  .summary-node-heading {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}

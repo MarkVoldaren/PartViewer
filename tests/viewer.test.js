@@ -165,6 +165,26 @@ test("missing/ambiguous routing and invalid times; zero times valid", () => {
   assert.equal(view(t).root.status, "ready");
   assert.equal(view(t).root.hours, 0);
 });
+test("Express Image Item No makes routing optional without bypassing other checks", () => {
+  const t = fixture();
+  t.items[0]["Express Image Item"] = "No";
+  t.routings = [];
+  let result = view(t);
+  assert.equal(result.root.status, "ready");
+  assert.equal(result.root.complete, false);
+  assert.match(result.root.warnings.join(), /Routing is optional/);
+  t.routings = [operation("1", "1", { "Setup Time": "" })];
+  result = view(t);
+  assert.equal(result.root.status, "ready");
+  assert.equal(result.root.operations[0].hours, null);
+  t.items[0]["Customer Approval"] = "No";
+  assert.equal(view(t).root.status, "blocked");
+  t.items[0]["Customer Approval"] = "Yes";
+  for (const value of ["Yes", "", undefined]) {
+    t.items[0]["Express Image Item"] = value;
+    assert.equal(view(t).root.status, "blocked");
+  }
+});
 test("ambiguous BOM names never attach a routing", () => {
   const t = fixture();
   t.connectors.push({ ...link("2", "4"), "Item Bill of Materials": "BOM 1" });

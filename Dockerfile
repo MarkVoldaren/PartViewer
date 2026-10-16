@@ -1,5 +1,7 @@
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
+ARG APP_BASE_PATH=/
+ENV APP_BASE_PATH=${APP_BASE_PATH}
 COPY package*.json ./
 RUN npm ci
 COPY tsconfig.json vite.config.js index.html ./

@@ -48,7 +48,7 @@ export function createApp({
     next();
   });
   const cookie = (token, age) =>
-    `pv_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${age}${secure ? "; Secure" : ""}`;
+    `pv_session=${token}; HttpOnly; SameSite=Strict; Path=${process.env.COOKIE_PATH || "/"}; Max-Age=${age}${secure ? "; Secure" : ""}`;
   const getSession = (req) => {
     const token = req.headers.cookie
       ?.split(";")
@@ -170,12 +170,10 @@ export function createApp({
       return res.status(409).json({ error: "Import a dataset first." });
     const { id, quantity, selections = {}, datasetId } = req.body || {};
     if (datasetId && datasetId !== store.current.metadata.id)
-      return res
-        .status(409)
-        .json({
-          error:
-            "Dataset changed. Reload the dataset and select revisions again.",
-        });
+      return res.status(409).json({
+        error:
+          "Dataset changed. Reload the dataset and select revisions again.",
+      });
     if (!store.current.items.has(id))
       return res.status(404).json({ error: "Part not found." });
     if (
@@ -211,11 +209,9 @@ export function createApp({
   );
   app.use((error, req, res, next) => {
     console.error(error.message);
-    res
-      .status(error.status || 500)
-      .json({
-        error: error.status === 400 ? "Invalid request." : "Request failed.",
-      });
+    res.status(error.status || 500).json({
+      error: error.status === 400 ? "Invalid request." : "Request failed.",
+    });
   });
   return app;
 }
