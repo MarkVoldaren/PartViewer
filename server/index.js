@@ -12,8 +12,8 @@ export function createApp({
   secure = false,
   now = () => Date.now(),
 }) {
-  if (!password || password.length < 12)
-    throw Error("APP_PASSWORD must contain at least 12 characters.");
+  if (!password || password.length < 10)
+    throw Error("APP_PASSWORD must contain at least 10 characters.");
   const app = express(),
     sessions = new Map(),
     attempts = new Map();

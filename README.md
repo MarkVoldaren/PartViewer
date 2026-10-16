@@ -9,7 +9,7 @@ Requires Node.js 24. Install with `npm ci`, then `npm run build`.
 In PowerShell:
 
 ```powershell
-$env:APP_PASSWORD = 'your-unique-password-at-least-12-characters'
+$env:APP_PASSWORD = 'your-unique-password-at-least-10-characters'
 $env:HOST = '127.0.0.1'
 npm start
 ```
