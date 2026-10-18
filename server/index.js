@@ -5,6 +5,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { openStore, buildTree } from "./data.js";
+import { createRequestService } from "./requests.js";
 
 export function createApp({
   store,
@@ -95,6 +96,85 @@ export function createApp({
     next();
   });
   app.get("/api/session", (_req, res) => res.json({ ok: true }));
+  const requests = createRequestService(store, () => new Date(now()));
+  const requestHandler = (handler) => (req, res) => {
+    try {
+      res.json(handler(req));
+    } catch (error) {
+      res
+        .status(error.status || 400)
+        .json({ error: error.message, ...error.details });
+    }
+  };
+  app.get(
+    "/api/customers",
+    requestHandler((req) =>
+      requests.customers(
+        String(req.query.q || ""),
+        req.query.includeInactive === "true",
+      ),
+    ),
+  );
+  app.get(
+    "/api/customers/dataset",
+    requestHandler(() => requests.customerMetadata()),
+  );
+  app.get(
+    "/api/request-date",
+    requestHandler(() => ({ date: requests.today() })),
+  );
+  app.get(
+    "/api/items/:id/intake",
+    requestHandler((req) => requests.assess(req.params.id)),
+  );
+  app.get(
+    "/api/requests",
+    requestHandler((req) =>
+      requests.list({
+        status: String(req.query.status || "open"),
+        q: String(req.query.q || ""),
+        customerId: String(req.query.customerId || ""),
+        requester: String(req.query.requester || ""),
+        urgent: req.query.urgent === "true",
+        scope: String(req.query.scope || ""),
+      }),
+    ),
+  );
+  app.post(
+    "/api/requests",
+    requestHandler((req) => requests.save(req.body)),
+  );
+  app.get(
+    "/api/requests/:id",
+    requestHandler((req) => requests.detail(Number(req.params.id))),
+  );
+  app.patch(
+    "/api/requests/:id",
+    requestHandler((req) => requests.save(req.body, Number(req.params.id))),
+  );
+  const customerUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 0 },
+  }).single("customers");
+  app.post("/api/customers/import", (req, res) =>
+    customerUpload(req, res, (error) => {
+      try {
+        if (error) throw error;
+        res.json(
+          requests.importCustomers(
+            req.file
+              ? {
+                  buffer: req.file.buffer,
+                  name: path.basename(req.file.originalname),
+                }
+              : null,
+          ),
+        );
+      } catch (error) {
+        res.status(error.status || 400).json({ error: error.message });
+      }
+    }),
+  );
   app.post("/api/logout", (req, res) => {
     sessions.delete(getSession(req));
     res.set("Set-Cookie", cookie("", 0)).json({ ok: true });

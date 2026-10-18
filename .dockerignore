@@ -6,3 +6,4 @@ data
 *.csv
 *.sqlite*
 tests
+artifacts

@@ -29,6 +29,14 @@ handle_path /part-viewer/* {
 
 ## Backup and rollback
 
+### Request queue upgrade
+
+The request feature adds tables for customers, requests, history, and customer import metadata. Startup applies the additive migration; four-file item imports still replace only the dataset/records tables. Before the first upgrade, use an online SQLite backup and save a private copy of `.env`. Keep both backups under `/root/part-viewer-backups` with restricted permissions.
+
+Import the four exports including the updated item master with **Costing Method**, then independently import **ActiveCustomerListResults153.csv**. Use the existing production volume; never replace it with a QA database. The CLI import commands can run in temporary containers against that volume while the app is stopped. For future refreshes, use the authenticated Data & imports page. Keep the production password unchanged during feature upgrades.
+
+If a first-upgrade import or verification fails, stop the app and restore the pre-upgrade SQLite backup plus previous image tag. Restoring that database is safe only before accepting new production requests; later rollback must preserve any requests submitted after the backup. Subsequent app-image rollbacks can leave the additive request/customer tables intact.
+
 Use the online SQLite backup command in README with `docker compose -f compose.production.yaml`. Do not copy a live database without its WAL. Backups contain business data and must remain private. Never use `down -v`.
 
 To roll back an app update, restore the previous `IMAGE_TAG` in `.env` and run `docker compose -f compose.production.yaml up -d --no-build`; leave the data volume intact. This first release does not change any existing app's database or configuration. To remove the new route, restore the timestamped Caddyfile backup in place, validate with `docker exec apps-caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile`, then reload with `docker exec apps-caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile`. The Caddy certificate volumes must be preserved.

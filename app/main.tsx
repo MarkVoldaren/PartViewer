@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
+import { api, post } from "./http";
+import { CustomerImport, RequestWorkspace } from "./requests";
 
 type Row = Record<string, string>;
 type Metadata = {
@@ -45,17 +47,6 @@ const hours = (n: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 3,
   });
-async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(import.meta.env.BASE_URL + "api" + url, options);
-  const body = await res.json();
-  if (!res.ok) throw Error(body.error || "Request failed");
-  return body;
-}
-const post = (body: unknown) => ({
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(body),
-});
 
 function AssemblySummary({ root }: { root: PartNode }) {
   const counts = { ready: 0, blocked: 0, outsourced: 0 };
@@ -373,7 +364,12 @@ function App() {
     [password, setPassword] = useState(""),
     [error, setError] = useState(""),
     [metadata, setMetadata] = useState<Metadata | null>(null),
-    [tab, setTab] = useState("viewer"),
+    [tab, setTab] = useState(
+      new URLSearchParams(location.search).has("request")
+        ? "requests"
+        : "viewer",
+    ),
+    [requestDirty, setRequestDirty] = useState(false),
     [query, setQuery] = useState(""),
     [hits, setHits] = useState<Hit[]>([]),
     [selected, setSelected] = useState<Hit | null>(null),
@@ -456,6 +452,21 @@ function App() {
     setQuery(part.name);
     setView(null);
   };
+  const navigate = (next: string) => {
+    if (next === tab) return;
+    if (
+      requestDirty &&
+      !window.confirm("Discard this unfinished request? It has not been saved.")
+    )
+      return;
+    setRequestDirty(false);
+    setTab(next);
+    if (next !== "requests") {
+      const url = new URL(location.href);
+      url.searchParams.delete("request");
+      history.replaceState(null, "", url);
+    }
+  };
   if (authenticated === null)
     return (
       <main className="login">
@@ -530,13 +541,19 @@ function App() {
         <nav aria-label="Main navigation">
           <button
             className={tab === "viewer" ? "active" : ""}
-            onClick={() => setTab("viewer")}
+            onClick={() => navigate("viewer")}
           >
             Part explorer
           </button>
           <button
+            className={tab === "requests" ? "active" : ""}
+            onClick={() => navigate("requests")}
+          >
+            Requests
+          </button>
+          <button
             className={tab === "data" ? "active" : ""}
-            onClick={() => setTab("data")}
+            onClick={() => navigate("data")}
           >
             Data & imports
           </button>
@@ -544,6 +561,11 @@ function App() {
         <button
           className="logout"
           onClick={async () => {
+            if (
+              requestDirty &&
+              !window.confirm("Discard this unfinished request and sign out?")
+            )
+              return;
             await api("/logout", post({}));
             setAuthenticated(false);
             setView(null);
@@ -561,12 +583,16 @@ function App() {
             <h1>
               {tab === "viewer"
                 ? "From part to production."
-                : "Your production data."}
+                : tab === "requests"
+                  ? "From request to resolution."
+                  : "Your production data."}
             </h1>
             <p>
               {tab === "viewer"
                 ? "Check readiness. Explore assemblies. Estimate routing hours."
-                : "Refresh all four NetSuite saved searches together."}
+                : tab === "requests"
+                  ? "Request assembly information, BOMs, and routings. Track the work in one queue."
+                  : "Refresh NetSuite item exports and the independent customer list."}
             </p>
           </div>
           <div className="dataset-status">
@@ -587,7 +613,9 @@ function App() {
             {error}
           </div>
         )}
-        {tab === "viewer" ? (
+        {tab === "requests" ? (
+          <RequestWorkspace onDirtyChange={setRequestDirty} />
+        ) : tab === "viewer" ? (
           <>
             <section className="lookup">
               <div className="search-field">
@@ -760,6 +788,7 @@ function App() {
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
+                  const form = e.currentTarget;
                   setBusy(true);
                   setError("");
                   try {
@@ -769,6 +798,7 @@ function App() {
                     await api("/import", { method: "POST", body });
                     await loadDataset();
                     setFiles({});
+                    form.reset();
                   } catch (e) {
                     setError((e as Error).message);
                   } finally {
@@ -780,7 +810,7 @@ function App() {
                   [
                     "items",
                     "Item master",
-                    "Includes Type, approvals and part attributes",
+                    "Includes Type, Costing Method, approvals and part attributes",
                   ],
                   [
                     "connectors",
@@ -825,6 +855,7 @@ function App() {
                 </button>
               </form>
             </section>
+            <CustomerImport />
             {metadata && (
               <section className="data-panel">
                 <h2>Current dataset</h2>

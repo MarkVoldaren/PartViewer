@@ -358,7 +358,14 @@ test("API authentication, CSRF, quantity, refresh, import failure and logout", a
 
 test(
   "supplied NetSuite dataset import and search performance",
-  { skip: !fs.existsSync("PARTVIEWERItemMasterListResults895.csv") },
+  {
+    skip: !fs
+      .readdirSync(".")
+      .some(
+        (name) =>
+          name.startsWith("PARTVIEWERItemMasterList") && name.endsWith(".csv"),
+      ),
+  },
   () => {
     const prefixes = {
       items: "PARTVIEWERItemMasterList",

@@ -14,6 +14,7 @@ export const schemas = {
     "Outsourced?",
     "Express Image Item",
     "Type",
+    "Costing Method",
   ],
   connectors: [
     "Item Name",
@@ -48,7 +49,39 @@ const add = (map, key, value) => {
   if (!map.has(key)) map.set(key, []);
   map.get(key).push(value);
 };
+// CSV cells repeat thousands of small classification strings. Share those values
+// so atomic refreshes can retain the live dataset within the droplet's heap limit.
+const sharedColumns = new Set([
+  "Type",
+  "Costing Method",
+  "Inactive",
+  "Outsourced?",
+  "Express Image Item",
+  "Customer Approval",
+  "DuraMark Approved",
+  "Variable Data",
+  "Machine Type",
+  "COLORS",
+  "Master Default?",
+  "Default Routing?",
+  "Manufacturing Work Center",
+  "Manufacturing Cost Template",
+  "Units",
+]);
+function sharedValues() {
+  const values = new Map();
+  return (value, column) => {
+    if (!sharedColumns.has(column)) return value;
+    if (!values.has(value)) values.set(value, value);
+    return values.get(value);
+  };
+}
 export function indexData(tables, metadata) {
+  const share = sharedValues();
+  for (const rows of Object.values(tables))
+    for (const row of rows)
+      for (const column of Object.keys(row))
+        row[column] = share(row[column], column);
   const items = new Map(tables.items.map((r) => [r["Item Internal ID"], r])),
     connectors = new Map(),
     components = new Map(),
@@ -139,11 +172,13 @@ export function openStore(filename) {
     import(files) {
       const tables = {},
         issues = [];
+      const share = sharedValues();
       for (const [kind, required] of Object.entries(schemas)) {
         const file = files[kind];
         if (!file) throw Error(`Missing ${kind} CSV`);
         let headers;
         const rows = parse(file.buffer, {
+          cast: (value, context) => share(value, context.column),
           bom: true,
           skip_empty_lines: true,
           columns: (cols) => {
