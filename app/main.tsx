@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
+import "./theme";
+import "./design.css";
+import { ThemeToggle } from "./theme";
 import { api, post } from "./http";
 import { CustomerImport, RequestWorkspace } from "./requests";
 
@@ -470,6 +473,7 @@ function App() {
   if (authenticated === null)
     return (
       <main className="login">
+        <ThemeToggle />
         <p>Opening Part Viewer…</p>
       </main>
     );
@@ -528,6 +532,7 @@ function App() {
     );
   return (
     <>
+      <a className="skip-link" href="#workspace">Skip to workspace</a>
       <header>
         <div className="brand">
           <div className="brand-icon">
@@ -540,24 +545,28 @@ function App() {
         </div>
         <nav aria-label="Main navigation">
           <button
+            aria-current={tab === "viewer" ? "page" : undefined}
             className={tab === "viewer" ? "active" : ""}
             onClick={() => navigate("viewer")}
           >
             Part explorer
           </button>
           <button
+            aria-current={tab === "requests" ? "page" : undefined}
             className={tab === "requests" ? "active" : ""}
             onClick={() => navigate("requests")}
           >
             Requests
           </button>
           <button
+            aria-current={tab === "data" ? "page" : undefined}
             className={tab === "data" ? "active" : ""}
             onClick={() => navigate("data")}
           >
             Data & imports
           </button>
         </nav>
+        <ThemeToggle />
         <button
           className="logout"
           onClick={async () => {
@@ -576,16 +585,16 @@ function App() {
           Sign out ↗
         </button>
       </header>
-      <main className="workspace">
+      <main className="workspace" id="workspace">
         <div className="page-title">
           <div>
             <p className="eyebrow">Production intelligence</p>
             <h1>
               {tab === "viewer"
-                ? "From part to production."
+                ? "Part explorer"
                 : tab === "requests"
-                  ? "From request to resolution."
-                  : "Your production data."}
+                  ? "Request workspace"
+                  : "Data & imports"}
             </h1>
             <p>
               {tab === "viewer"
@@ -617,7 +626,7 @@ function App() {
           <RequestWorkspace onDirtyChange={setRequestDirty} />
         ) : tab === "viewer" ? (
           <>
-            <section className="lookup">
+            <section className="lookup" aria-label="Part lookup">
               <div className="search-field">
                 <label htmlFor="part-search">Find a part</label>
                 <input
@@ -750,7 +759,8 @@ function App() {
               </>
             ) : (
               <section className="empty-state">
-                <div className="empty-symbol">⌕</div>
+                <div className="empty-symbol" aria-hidden="true">⌕</div>
+                <p className="eyebrow">Your next production run starts here</p>
                 <h2>
                   {metadata
                     ? "Start with a part."

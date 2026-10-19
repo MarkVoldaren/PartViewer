@@ -1,6 +1,6 @@
 .request-panel {
-  background: white;
-  border: 1px solid #dce4dc;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 26px;
   margin-bottom: 24px;
@@ -20,7 +20,7 @@
 }
 .date-label {
   font-size: 11px;
-  color: #748374;
+  color: var(--muted);
 }
 .wizard-steps {
   display: grid;
@@ -28,7 +28,7 @@
   list-style: none;
   padding: 0 0 22px;
   margin: 0 0 24px;
-  border-bottom: 1px solid #e0e7dc;
+  border-bottom: 1px solid var(--line);
   gap: 12px;
 }
 .wizard-steps li {
@@ -36,27 +36,27 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #81917f;
+  color: var(--muted);
 }
 .wizard-steps li span {
   width: 27px;
   height: 27px;
   border-radius: 50%;
-  background: #f0f3eb;
+  background: var(--subtle);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 .wizard-steps li.current {
-  color: #244d40;
+  color: var(--accent);
   font-weight: 700;
 }
 .wizard-steps li.current span {
-  background: #d6eb8c;
+  background: var(--accent-soft);
 }
 .wizard-steps li.done {
-  color: #487a56;
+  color: var(--success);
 }
 .wizard-content {
   max-width: 840px;
@@ -89,10 +89,10 @@
   background: none;
   border: 0;
   font-size: 22px;
-  color: #72836e;
+  color: var(--muted);
 }
 .lookup-close {
-  color: #69825e;
+  color: var(--muted);
   font-size: 11px;
 }
 .request-lookup .search-results {
@@ -113,12 +113,12 @@
   height: 17px;
   margin: 0;
   padding: 0;
-  accent-color: #244d40;
+  accent-color: var(--accent);
   flex-shrink: 0;
   cursor: pointer;
 }
 fieldset {
-  border: 1px solid #e0e7dc;
+  border: 1px solid var(--line);
   border-radius: 7px;
   padding: 12px 18px;
   margin: 22px 0;
@@ -135,21 +135,21 @@ textarea {
   min-height: 85px;
   font: inherit;
   font-size: 13px;
-  border: 1px solid #d7e0d8;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  background: #fbfcfa;
+  background: var(--surface);
   padding: 12px 14px;
   margin-top: 7px;
-  color: #213b33;
+  color: var(--ink);
 }
 textarea:focus-visible {
-  outline: 3px solid #40a99b;
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 .form-hint,
 .customer-meta {
   font-size: 12px;
-  color: #72816b;
+  color: var(--muted);
   line-height: 1.7;
 }
 .wizard-actions {
@@ -158,7 +158,7 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 12px;
   margin-top: 25px;
-  border-top: 1px solid #e3e9df;
+  border-top: 1px solid var(--line);
   padding-top: 21px;
 }
 .wizard-actions > div,
@@ -167,17 +167,17 @@ textarea:focus-visible {
   gap: 12px;
 }
 .secondary {
-  background: #f5f8f1;
-  border: 1px solid #d8e2d1;
-  color: #47633f;
+  background: var(--subtle);
+  border: 1px solid var(--line);
+  color: var(--ink);
   padding: 11px 18px;
   border-radius: 6px;
   font-size: 12px;
 }
 .intake-item {
-  border: 1px solid #dde5d8;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f9fbf5;
+  background: var(--subtle);
   padding: 14px 17px;
   margin: 20px 0;
 }
@@ -190,18 +190,18 @@ textarea:focus-visible {
 }
 .item-classification {
   font-size: 11px;
-  color: #73826c;
+  color: var(--muted);
 }
 .reference-item {
-  border-color: #c4d3dd;
-  background: #f1f6f9;
+  border-color: var(--line);
+  background: var(--info-bg);
 }
 .reference-label {
   display: inline-block;
   font-size: 10px;
   font-weight: 650;
-  color: #4a6a80;
-  background: #e6eef3;
+  color: var(--info);
+  background: var(--info-bg);
   border-radius: 5px;
   padding: 4px 7px;
   margin: 5px 0;
@@ -212,10 +212,10 @@ textarea:focus-visible {
 details summary {
   cursor: pointer;
   font-size: 12px;
-  color: #496345;
+  color: var(--ink);
 }
 .intake-item details small {
-  color: #778671;
+  color: var(--muted);
   font-size: 10px;
 }
 .validator-finding {
@@ -225,9 +225,9 @@ details summary {
 }
 .old-item-checkbox {
   padding: 12px 15px;
-  background: #f0f5f7;
+  background: var(--info-bg);
   border-radius: 7px;
-  color: #49697e;
+  color: var(--info);
 }
 .review-grid {
   display: grid;
@@ -238,7 +238,7 @@ details summary {
 .review-grid small {
   display: block;
   font-size: 10px;
-  color: #819076;
+  color: var(--muted);
   margin-bottom: 6px;
 }
 .review-grid strong {
@@ -259,8 +259,8 @@ details summary {
   font-size: 12px;
 }
 .success-message {
-  background: #edf6e7;
-  color: #47723b;
+  background: var(--success-bg);
+  color: var(--success);
   padding: 12px 16px;
   border-radius: 7px;
   font-size: 12px;
@@ -271,17 +271,17 @@ details summary {
   margin-bottom: 22px;
 }
 .queue-tabs button {
-  background: white;
-  border: 1px solid #dce5d5;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 7px;
   padding: 10px 20px;
-  color: #73846a;
+  color: var(--muted);
   font-size: 12px;
 }
 .queue-tabs button.active {
-  color: #244d40;
-  border-color: #244d40;
-  background: #eaf1de;
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
   font-weight: 650;
 }
 .queue-filters {
@@ -289,9 +289,9 @@ details summary {
   grid-template-columns: 1.4fr 1.3fr 1fr 1fr auto;
   gap: 14px;
   align-items: end;
-  background: #fff;
+  background: var(--surface);
   padding: 20px;
-  border: 1px solid #dfe6d8;
+  border: 1px solid var(--line);
   border-radius: 10px;
 }
 .queue-filters .check-field {
@@ -311,19 +311,19 @@ details summary {
   gap: 12px;
   margin: 20px 0 12px;
   font-size: 11px;
-  color: #77876d;
+  color: var(--muted);
 }
 .queue-table {
-  background: white;
-  border: 1px solid #dce5d4;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 9px;
 }
 .queue-table table {
   min-width: 1700px;
 }
 .queue-table th {
-  background: #214439;
-  color: #e6efe0;
+  background: var(--ink);
+  color: var(--subtle);
   padding: 15px 12px;
   font-size: 9px;
 }
@@ -343,15 +343,15 @@ details summary {
   min-width: 150px;
 }
 .queue-table .urgent-row {
-  background: #fcf8e9;
+  background: var(--warning-bg);
 }
 .queue-table .mismatch-cell {
-  background: #fff0cf;
+  background: var(--warning-bg);
   font-weight: 650;
-  color: #946125;
+  color: var(--warning);
 }
 .mismatch-text {
-  color: #a46b22 !important;
+  color: var(--warning) !important;
 }
 .request-number {
   font-weight: 700;
@@ -359,7 +359,7 @@ details summary {
   white-space: nowrap;
 }
 .urgent-label {
-  color: #a2562e;
+  color: var(--warning);
   font-weight: 700;
 }
 .queue-notes {
@@ -373,7 +373,7 @@ details summary {
 .queue-empty {
   text-align: center;
   padding: 50px 20px;
-  color: #7a8b70;
+  color: var(--muted);
 }
 .queue-empty h3 {
   font-size: 18px;
@@ -388,12 +388,12 @@ details summary {
 }
 .history {
   margin-top: 30px;
-  border-top: 1px solid #e0e7da;
+  border-top: 1px solid var(--line);
   padding-top: 22px;
 }
 .history > div {
   padding: 16px 0;
-  border-bottom: 1px solid #e0e7da;
+  border-bottom: 1px solid var(--line);
 }
 .history h3 {
   font-size: 12px;
@@ -405,7 +405,7 @@ details summary {
   margin: 10px 0;
 }
 .history dt {
-  color: #73856a;
+  color: var(--muted);
   font-weight: 650;
 }
 .history dd {
