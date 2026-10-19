@@ -20,9 +20,9 @@ For development, run `npm run server` with the password environment variable in 
 
 ## Docker package
 
-For the shared DuraMark droplet, use [DEPLOYMENT.md](DEPLOYMENT.md) and `compose.production.yaml`. The configuration below is for local Docker testing.
+For the shared DuraMark droplet, use [DEPLOYMENT.md](DEPLOYMENT.md) and the default `compose.yaml`. The configuration below is for local Docker testing with `compose.local.yaml`.
 
-Copy `.env.example` to `.env` and replace the password. Run `docker compose up --build -d` when ready. The app binds to localhost port 3000; SQLite resides in the named `part-viewer-data` volume. CSV exports and local data are excluded from the image and Git. A fresh container starts without business data; import through the app after sign-in.
+Copy `.env.example` to `.env` and replace the password. Run `docker compose -f compose.local.yaml up --build -d` when ready. The app binds to localhost port 3000; SQLite resides in the named `part-viewer-data` volume. CSV exports and local data are excluded from the image and Git. A fresh container starts without business data; import through the app after sign-in.
 
 On the droplet, terminate HTTPS at your reverse proxy and forward traffic to `127.0.0.1:3000`. Set `APP_ORIGIN=https://your-domain.example` and `COOKIE_SECURE=true`. Keep `COOKIE_SECURE=false` only for local HTTP. Configure your proxy for uploads of at least 160 MB and a 120-second request timeout. The app accepts four files up to 40 MiB each. Compose reserves a 1 GiB memory limit; larger future exports may require more memory. No deployment or remote Git push is performed by this project.
 
@@ -33,8 +33,8 @@ The account has no username; `APP_PASSWORD` is the single account's password. Pa
 Use SQLite's online backup API rather than copying a live WAL-mode file:
 
 ```sh
-docker compose exec part-viewer node --input-type=module -e "import {DatabaseSync,backup} from 'node:sqlite'; const db=new DatabaseSync(process.env.DB_PATH); await backup(db,'/app/data/backup.sqlite'); db.close();"
-docker compose cp part-viewer:/app/data/backup.sqlite ./backup.sqlite
+docker compose -f compose.local.yaml exec part-viewer node --input-type=module -e "import {DatabaseSync,backup} from 'node:sqlite'; const db=new DatabaseSync(process.env.DB_PATH); await backup(db,'/app/data/backup.sqlite'); db.close();"
+docker compose -f compose.local.yaml cp part-viewer:/app/data/backup.sqlite ./backup.sqlite
 ```
 
 Store the backup securely outside the droplet. To restore, stop the service, copy the backup into the persistent volume as `part-viewer.sqlite`, remove any old `part-viewer.sqlite-wal` and `part-viewer.sqlite-shm` files while stopped, ensure UID 1000 owns the restored file, and restart. Avoid `docker compose down -v`, which deletes the persistent volume.

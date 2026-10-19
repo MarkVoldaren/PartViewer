@@ -1,0 +1,16 @@
+services:
+  part-viewer:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PORT:-3000}:3000"
+    environment:
+      APP_PASSWORD: ${APP_PASSWORD:?Set APP_PASSWORD in .env}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      DB_PATH: /app/data/part-viewer.sqlite
+    volumes:
+      - part-viewer-data:/app/data
+    mem_limit: 1g
+volumes:
+  part-viewer-data:

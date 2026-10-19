@@ -1,16 +1,27 @@
 services:
   part-viewer:
-    build: .
+    image: solutions-part-viewer:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      args:
+        APP_BASE_PATH: /part-viewer/
+    container_name: duramark-part-viewer
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:${PORT:-3000}:3000"
     environment:
       APP_PASSWORD: ${APP_PASSWORD:?Set APP_PASSWORD in .env}
-      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      APP_ORIGIN: https://duramark.jays-apps.com
+      COOKIE_SECURE: "true"
+      COOKIE_PATH: /part-viewer/
       DB_PATH: /app/data/part-viewer.sqlite
+      NODE_OPTIONS: --max-old-space-size=512
     volumes:
       - part-viewer-data:/app/data
-    mem_limit: 1g
+    networks:
+      - apps_proxy
+    mem_limit: 768m
+    memswap_limit: 1536m
 volumes:
   part-viewer-data:
+networks:
+  apps_proxy:
+    external: true
